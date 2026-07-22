@@ -1,5 +1,12 @@
-import { bangs } from "./bang";
+import { resolveRedirectUrl, type Bang } from "./bang-redirect";
 import "./global.css";
+
+// Fire immediately (not on `window.load`) so the service worker has a chance
+// to install even on a visit that's about to navigate away via a redirect.
+// This never blocks the redirect below — it's best-effort for next time.
+if ("serviceWorker" in navigator) {
+  import("virtual:pwa-register").then(({ registerSW }) => registerSW());
+}
 
 function noSearchDefaultPageRender() {
   const app = document.querySelector<HTMLDivElement>("#app")!;
@@ -44,10 +51,7 @@ function noSearchDefaultPageRender() {
   });
 }
 
-const LS_DEFAULT_BANG = localStorage.getItem("default-bang") ?? "g";
-const defaultBang = bangs.find((b) => b.t === LS_DEFAULT_BANG);
-
-function getBangredirectUrl() {
+async function getBangredirectUrl(): Promise<string | null> {
   const url = new URL(window.location.href);
   const query = url.searchParams.get("q")?.trim() ?? "";
   if (!query) {
@@ -55,32 +59,18 @@ function getBangredirectUrl() {
     return null;
   }
 
-  const match = query.match(/!(\S+)/i);
+  // In production this whole file is a fallback: the Cloudflare Worker already
+  // redirected before any HTML was sent. Only pay for the (large) bang list
+  // when the query actually names one.
+  const needsBangLookup = /!\S+/i.test(query);
+  const bangs: Bang[] = needsBangLookup ? (await import("./bang")).bangs : [];
+  const bangMap = new Map(bangs.map((b) => [b.t, b]));
 
-  const bangCandidate = match?.[1]?.toLowerCase();
-  const selectedBang = bangs.find((b) => b.t === bangCandidate) ?? defaultBang;
-
-  // Remove the first bang from the query
-  const cleanQuery = query.replace(/!\S+\s*/i, "").trim();
-
-  // If the query is just `!gh`, use `github.com` instead of `github.com/search?q=`
-  if (cleanQuery === "")
-    return selectedBang ? `https://${selectedBang.d}` : null;
-
-  // Format of the url is:
-  // https://www.google.com/search?q={{{s}}}
-  const searchUrl = selectedBang?.u.replace(
-    "{{{s}}}",
-    // Replace %2F with / to fix formats like "!ghr+t3dotgg/unduck"
-    encodeURIComponent(cleanQuery).replace(/%2F/g, "/"),
-  );
-  if (!searchUrl) return null;
-
-  return searchUrl;
+  return resolveRedirectUrl(query, (t) => bangMap.get(t));
 }
 
-function doRedirect() {
-  const searchUrl = getBangredirectUrl();
+async function doRedirect() {
+  const searchUrl = await getBangredirectUrl();
   if (!searchUrl) return;
   window.location.replace(searchUrl);
 }
