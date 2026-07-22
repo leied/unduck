@@ -1,5 +1,7 @@
 # Unduck
 
+An AI Mode-first fix of [Theo](https://x.com/theo)'s [unduck](https://github.com/t3dotgg/unduck), plus a Cloudflare Workers enhancement: bangs still work exactly as before, but a plain query now defaults to Google's AI Mode instead of classic search, and redirects resolve at the edge instead of client side.
+
 DuckDuckGo's bang redirects are too slow. Add the following URL as a custom search engine to your browser. Enables all of DuckDuckGo's bangs to work, but much faster.
 
 ```
