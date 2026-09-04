@@ -5,7 +5,7 @@ export type Bang = {
 };
 
 // No bang at all: plain query goes straight to Google.
-export const DEFAULT_SEARCH_TEMPLATE = "https://www.google.com/search?udm=50&q={{{s}}}";
+export const DEFAULT_SEARCH_TEMPLATE = "https://www.google.com/search?udm=50&atvm=2&q={{{s}}}";
 // A bare "!" with no bang text attached (e.g. "! cats") is an "empty bang".
 export const EMPTY_BANG_SEARCH_TEMPLATE = "https://www.google.ch/search?q={{{s}}}";
 
