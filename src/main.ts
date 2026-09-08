@@ -33,6 +33,9 @@ function noSearchDefaultPageRender() {
         <a href="https://x.com/theo" target="_blank">theo</a>
         •
         <a href="https://github.com/t3dotgg/unduck" target="_blank">github</a>
+        •
+        <button class="clear-cache-button" type="button">clear cache</button>
+        <div class="build-hash">build ${__COMMIT_HASH__}</div>
       </footer>
     </div>
   `;
@@ -48,6 +51,23 @@ function noSearchDefaultPageRender() {
     setTimeout(() => {
       copyIcon.src = "/clipboard.svg";
     }, 2000);
+  });
+
+  const clearCacheButton = app.querySelector<HTMLButtonElement>(".clear-cache-button")!;
+  clearCacheButton.addEventListener("click", async () => {
+    clearCacheButton.disabled = true;
+    clearCacheButton.textContent = "clearing…";
+
+    if ("serviceWorker" in navigator) {
+      const registrations = await navigator.serviceWorker.getRegistrations();
+      await Promise.all(registrations.map((registration) => registration.unregister()));
+    }
+    if ("caches" in window) {
+      const keys = await caches.keys();
+      await Promise.all(keys.map((key) => caches.delete(key)));
+    }
+
+    window.location.reload();
   });
 }
 

@@ -140,14 +140,22 @@ textarea {
   color: #666;
 }
 
-.footer a {
+.footer a,
+.footer .clear-cache-button {
   color: #666;
   text-decoration: none;
   font-weight: 500;
 }
 
-.footer a:hover {
+.footer a:hover,
+.footer .clear-cache-button:hover {
   color: #333;
+}
+
+.build-hash {
+  margin-top: 4px;
+  font-size: 11px;
+  opacity: 0.6;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -168,11 +176,13 @@ textarea {
   }
 
   .footer,
-  .footer a {
+  .footer a,
+  .footer .clear-cache-button {
     color: #999;
   }
 
-  .footer a:hover {
+  .footer a:hover,
+  .footer .clear-cache-button:hover {
     color: #ccc;
   }
 

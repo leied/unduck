@@ -1,7 +1,19 @@
+import { execSync } from "node:child_process";
 import { defineConfig } from "vite";
 import { VitePWA } from "vite-plugin-pwa";
 
+function getCommitHash() {
+  try {
+    return execSync("git rev-parse --short HEAD").toString().trim();
+  } catch {
+    return "unknown";
+  }
+}
+
 export default defineConfig({
+  define: {
+    __COMMIT_HASH__: JSON.stringify(getCommitHash()),
+  },
   plugins: [
     VitePWA({
       registerType: "autoUpdate",
@@ -9,6 +21,16 @@ export default defineConfig({
       // than on the `load` event, so it has a chance to install even on a
       // visit that's about to navigate away via a bang redirect.
       injectRegister: false,
+      workbox: {
+        // A new SW takes over (and precached assets get pruned) as soon as
+        // it finishes installing, instead of waiting for every open tab to
+        // close. Since this app redirects away almost immediately, tabs
+        // rarely stick around long enough for the usual "next reload" update
+        // path to kick in.
+        skipWaiting: true,
+        clientsClaim: true,
+        cleanupOutdatedCaches: true,
+      },
     }),
   ],
 });
