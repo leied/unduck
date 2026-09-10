@@ -30,6 +30,14 @@ export default defineConfig({
         skipWaiting: true,
         clientsClaim: true,
         cleanupOutdatedCaches: true,
+        // Search navigations have to reach the Worker so it answers with a 302,
+        // which the browser treats as a continuation of the user's own omnibox
+        // navigation (Sec-Fetch-Site: none, Sec-Fetch-User: ?1). Letting the
+        // default navigateFallback serve the precached shell instead pushes the
+        // redirect into JS, which arrives as a script-initiated cross-site
+        // navigation with no user activation — Google interrupts those with a
+        // confirmation prompt.
+        navigateFallbackDenylist: [/[?&]q=/],
       },
     }),
   ],

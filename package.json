@@ -9,6 +9,7 @@
     "preview": "vite preview",
     "typecheck:worker": "tsc -p tsconfig.worker.json",
     "cf-typegen": "wrangler types",
+    "sync-bangs": "node scripts/sync-bangs.mjs",
     "dev:worker": "pnpm run build && wrangler dev",
     "deploy": "pnpm run build && pnpm run typecheck:worker && wrangler deploy"
   },
