@@ -17,7 +17,16 @@ export default {
       if (query !== null) {
         const redirectUrl = resolveRedirectUrl(query, (t) => bangMap.get(t));
         if (redirectUrl) {
-          return Response.redirect(redirectUrl, 302);
+          // No Referrer-Policy header on a bare Response.redirect() means the
+          // browser falls back to strict-origin-when-cross-origin and still
+          // sends this origin as the Referer on the hop to the destination.
+          return new Response(null, {
+            status: 302,
+            headers: {
+              Location: redirectUrl,
+              "Referrer-Policy": "no-referrer",
+            },
+          });
         }
       }
     }
