@@ -34,7 +34,7 @@ function noSearchDefaultPageRender() {
         •
         <a href="https://github.com/t3dotgg/unduck" target="_blank">github</a>
         •
-        <button class="clear-cache-button" type="button">clear cache</button>
+        <a href="/__reset">clear cache</a>
         <div class="build-hash">build ${__COMMIT_HASH__}</div>
       </footer>
     </div>
@@ -52,23 +52,6 @@ function noSearchDefaultPageRender() {
       copyIcon.src = "/clipboard.svg";
     }, 2000);
   });
-
-  const clearCacheButton = app.querySelector<HTMLButtonElement>(".clear-cache-button")!;
-  clearCacheButton.addEventListener("click", async () => {
-    clearCacheButton.disabled = true;
-    clearCacheButton.textContent = "clearing…";
-
-    if ("serviceWorker" in navigator) {
-      const registrations = await navigator.serviceWorker.getRegistrations();
-      await Promise.all(registrations.map((registration) => registration.unregister()));
-    }
-    if ("caches" in window) {
-      const keys = await caches.keys();
-      await Promise.all(keys.map((key) => caches.delete(key)));
-    }
-
-    window.location.reload();
-  });
 }
 
 async function getBangredirectUrl(): Promise<string | null> {
@@ -79,11 +62,12 @@ async function getBangredirectUrl(): Promise<string | null> {
     return null;
   }
 
-  // In production this whole file is a fallback: the Cloudflare Worker already
-  // redirected before any HTML was sent. Only pay for the (large) bang list
-  // when the query actually names one.
+  // Last resort only: the service worker redirects without loading this page at
+  // all, and before it exists the Cloudflare Worker does. Reaching here means
+  // both were bypassed. Only pay for the (large) bang list when the query
+  // actually names one.
   const needsBangLookup = /!\S+/i.test(query);
-  const bangs: Bang[] = needsBangLookup ? (await import("./bang")).bangs : [];
+  const bangs: Bang[] = needsBangLookup ? await fetch("/bangs.json").then((r) => r.json()) : [];
   const bangMap = new Map(bangs.map((b) => [b.t, b]));
 
   return resolveRedirectUrl(query, (t) => bangMap.get(t));

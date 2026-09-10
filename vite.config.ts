@@ -16,28 +16,22 @@ export default defineConfig({
   },
   plugins: [
     VitePWA({
+      // The service worker answers search navigations with a redirect of its
+      // own rather than serving the app shell, which needs hand-written fetch
+      // logic. See src/sw.ts for why that specific shape avoids Google's
+      // confirmation prompt.
+      strategies: "injectManifest",
+      srcDir: "src",
+      filename: "sw.ts",
       registerType: "autoUpdate",
       // We register the SW ourselves in main.ts, immediately on load rather
       // than on the `load` event, so it has a chance to install even on a
       // visit that's about to navigate away via a bang redirect.
       injectRegister: false,
-      workbox: {
-        // A new SW takes over (and precached assets get pruned) as soon as
-        // it finishes installing, instead of waiting for every open tab to
-        // close. Since this app redirects away almost immediately, tabs
-        // rarely stick around long enough for the usual "next reload" update
-        // path to kick in.
-        skipWaiting: true,
-        clientsClaim: true,
-        cleanupOutdatedCaches: true,
-        // Search navigations have to reach the Worker so it answers with a 302,
-        // which the browser treats as a continuation of the user's own omnibox
-        // navigation (Sec-Fetch-Site: none, Sec-Fetch-User: ?1). Letting the
-        // default navigateFallback serve the precached shell instead pushes the
-        // redirect into JS, which arrives as a script-initiated cross-site
-        // navigation with no user activation — Google interrupts those with a
-        // confirmation prompt.
-        navigateFallbackDenylist: [/[?&]q=/],
+      injectManifest: {
+        // The bang list is fetched and refreshed by the service worker on its
+        // own schedule; precaching it too would store 1.4MB twice.
+        globIgnores: ["**/bangs.json"],
       },
     }),
   ],

@@ -140,15 +140,13 @@ textarea {
   color: #666;
 }
 
-.footer a,
-.footer .clear-cache-button {
+.footer a {
   color: #666;
   text-decoration: none;
   font-weight: 500;
 }
 
-.footer a:hover,
-.footer .clear-cache-button:hover {
+.footer a:hover {
   color: #333;
 }
 
@@ -176,13 +174,11 @@ textarea {
   }
 
   .footer,
-  .footer a,
-  .footer .clear-cache-button {
+  .footer a {
     color: #999;
   }
 
-  .footer a:hover,
-  .footer .clear-cache-button:hover {
+  .footer a:hover {
     color: #ccc;
   }
 

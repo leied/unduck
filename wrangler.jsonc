@@ -6,9 +6,10 @@
   "assets": {
     "directory": "./dist",
     "binding": "ASSETS",
-    // Only intercept "/" (where ?q= redirects happen) so every other asset
-    // request is served straight from the edge without invoking the Worker.
-    "run_worker_first": ["/"]
+    // Only intercept "/" (where ?q= redirects happen) and "/__reset" (the
+    // cache-purge endpoint) so every other asset request is served straight
+    // from the edge without invoking the Worker.
+    "run_worker_first": ["/", "/__reset"]
   },
   "observability": {
     "enabled": true

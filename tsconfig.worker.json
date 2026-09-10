@@ -4,5 +4,5 @@
     "lib": ["ES2022"],
     "types": ["@cloudflare/workers-types"]
   },
-  "include": ["worker", "src/bang.ts", "src/bang-redirect.ts"]
+  "include": ["worker", "src/bang-redirect.ts", "public/bangs.json"]
 }
