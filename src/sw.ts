@@ -69,6 +69,27 @@ self.addEventListener("activate", (event) => {
   );
 });
 
+// Firefox ignores Referrer-Policy on a redirect a service worker synthesizes,
+// so a 302 from here reaches the destination with this origin as the Referer —
+// which is what makes Google's AI Mode interrupt with "Continue with this
+// search?". A document's own referrer policy *is* honoured, so hand back four
+// lines of HTML that navigate themselves instead. Still no network hop.
+function redirectDocument(destination: string): Response {
+  // Escaped for a JS string literal, with < escaped too so a bang template can
+  // never close the script tag.
+  const encoded = JSON.stringify(destination).replace(/</g, "\\u003c");
+  return new Response(
+    `<!doctype html><meta charset="utf-8"><meta name="referrer" content="no-referrer">` +
+      `<script>location.replace(${encoded})</script>`,
+    {
+      headers: {
+        "Content-Type": "text/html; charset=utf-8",
+        "Referrer-Policy": "no-referrer",
+      },
+    },
+  );
+}
+
 async function redirect(event: FetchEvent, query: string): Promise<Response> {
   const store = await cached();
 
@@ -92,21 +113,13 @@ async function redirect(event: FetchEvent, query: string): Promise<Response> {
   const destination = resolveRedirectUrl(query, find);
   if (!destination) return fetch(event.request);
 
-  // new URL throws on anything that isn't an absolute URL. Letting that reach
-  // the catch below would still be correct, but checking here keeps a
-  // malformed entry from looking like a transport failure.
-  new URL(destination);
+  // Unlike a Location header, which the browser vets, this URL is handed to
+  // location.replace() — so a javascript: entry would execute. new URL also
+  // throws on anything that isn't absolute.
+  const { protocol } = new URL(destination);
+  if (protocol !== "https:" && protocol !== "http:") return fetch(event.request);
 
-  // Response.redirect() can't carry custom headers, so it can't be used here:
-  // without an explicit Referrer-Policy, Firefox falls back to sending this
-  // origin as the Referer on the hop to the destination.
-  return new Response(null, {
-    status: 302,
-    headers: {
-      Location: destination,
-      "Referrer-Policy": "no-referrer",
-    },
-  });
+  return redirectDocument(destination);
 }
 
 self.addEventListener("fetch", (event) => {

@@ -16,10 +16,9 @@ export default defineConfig({
   },
   plugins: [
     VitePWA({
-      // The service worker answers search navigations with a redirect of its
-      // own rather than serving the app shell, which needs hand-written fetch
-      // logic. See src/sw.ts for why that specific shape avoids Google's
-      // confirmation prompt.
+      // The service worker answers search navigations itself rather than
+      // serving the app shell, which needs hand-written fetch logic. See
+      // src/sw.ts for why it answers with a document instead of a redirect.
       strategies: "injectManifest",
       srcDir: "src",
       filename: "sw.ts",
