@@ -15,15 +15,29 @@ export default {
     const url = new URL(request.url);
 
     if (url.pathname === "/__reset") {
-      // Clear-Site-Data wipes the browser's HTTP cache and "storage" (which
-      // covers Cache Storage and service worker registrations), so a stuck or
-      // stale-cached client can recover just by visiting this URL — no JS
-      // required on their end beyond the redirect below.
+      // Clear-Site-Data is the belt; the script is the suspenders. On Firefox
+      // for Android the header alone has not reliably killed an
+      // already-controlling service worker in testing, so this also
+      // unregisters and deletes caches directly — the same origin-scoped
+      // APIs the old in-page "clear cache" button used, which is why they're
+      // reliable here even where the header isn't.
       return new Response(
         `<!doctype html>
 <meta charset="utf-8">
 <title>Reset complete</title>
-<script>location.replace("/?reset=" + Date.now())</script>
+<script>
+(async () => {
+  if ("serviceWorker" in navigator) {
+    const registrations = await navigator.serviceWorker.getRegistrations();
+    await Promise.all(registrations.map((r) => r.unregister()));
+  }
+  if ("caches" in window) {
+    const keys = await caches.keys();
+    await Promise.all(keys.map((k) => caches.delete(k)));
+  }
+  location.replace("/?reset=" + Date.now());
+})();
+</script>
 Resetting…`,
         {
           headers: {
