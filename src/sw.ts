@@ -92,11 +92,21 @@ async function redirect(event: FetchEvent, query: string): Promise<Response> {
   const destination = resolveRedirectUrl(query, find);
   if (!destination) return fetch(event.request);
 
-  // Response.redirect throws on anything that isn't an absolute URL. Letting
-  // that reach the catch below would still be correct, but checking here keeps
-  // a malformed entry from looking like a transport failure.
+  // new URL throws on anything that isn't an absolute URL. Letting that reach
+  // the catch below would still be correct, but checking here keeps a
+  // malformed entry from looking like a transport failure.
   new URL(destination);
-  return Response.redirect(destination, 302);
+
+  // Response.redirect() can't carry custom headers, so it can't be used here:
+  // without an explicit Referrer-Policy, Firefox falls back to sending this
+  // origin as the Referer on the hop to the destination.
+  return new Response(null, {
+    status: 302,
+    headers: {
+      Location: destination,
+      "Referrer-Policy": "no-referrer",
+    },
+  });
 }
 
 self.addEventListener("fetch", (event) => {
