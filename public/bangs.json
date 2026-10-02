@@ -10888,7 +10888,7 @@
 {"d":"srthealing.com","t":"srtblog","u":"https://srthealing.com/?s={{{s}}}"},
 {"d":"www.reddit.com","t":"srtop","u":"https://www.reddit.com/r/{{{s}}}/top/?sort=top&t=all"},
 {"d":"stukroodvlees.nl","t":"srv","u":"http://stukroodvlees.nl/?s={{{s}}}"},
-{"d":"duckduckgo.com","t":"ss64","u":"http://duckduckgo.com/?q={{{s}}}+site:www.ss64.com"},
+{"d":"duckduckgo.com","t":"ss64","u":"http://duckduckgo.com/?q={{{s}}}+site:ss64.com"},
 {"d":"ssaft.com","t":"ssaft","u":"http://ssaft.com/Blog/dotclear/?q={{{s}}}"},
 {"d":"www.ssb.no","t":"ssbno","u":"https://www.ssb.no/sok?sok= {{{s}}}"},
 {"d":"www.ssbwiki.com","t":"ssb","u":"http://www.ssbwiki.com/index.php?title=Special%3ASearch&search={{{s}}}&go=Go"},
