@@ -31,7 +31,7 @@ jobs:
 
       - name: Check for changes
         id: check
-        run: git diff --quiet src/bang.ts || echo "changed=true" >> "$GITHUB_OUTPUT"
+        run: git diff --quiet public/bangs.json || echo "changed=true" >> "$GITHUB_OUTPUT"
 
       - name: Open or update pull request
         if: steps.check.outputs.changed
@@ -42,7 +42,7 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git checkout -B "$BRANCH"
-          git add src/bang.ts
+          git add public/bangs.json
           git commit -m "sync bangs from DuckDuckGo"
           git push --force origin "$BRANCH"
 
@@ -50,5 +50,5 @@ jobs:
             gh pr create \
               --head "$BRANCH" \
               --title "Sync bangs from DuckDuckGo" \
-              --body "$(printf 'Automated refresh of `src/bang.ts`.\n\n```\n%s\n```\n' "$(cat summary.txt)")"
+              --body "$(printf 'Automated refresh of `public/bangs.json`.\n\n```\n%s\n```\n' "$(cat summary.txt)")"
           fi
